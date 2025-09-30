@@ -38,7 +38,6 @@ submitBtn.addEventListener("click", async () => {
       uid: userId,
       color,
       role,
-      photoURL,
       matchWith: null
     });
     await setDoc(waitingRef, { uid: userId }); // marco como esperando
@@ -53,7 +52,6 @@ submitBtn.addEventListener("click", async () => {
       uid: userId,
       color,
       role,
-      photoURL,
       matchWith: otherId
     });
 
@@ -71,4 +69,5 @@ submitBtn.addEventListener("click", async () => {
   resultDiv.style.display = "block";
 
 });
+
 
