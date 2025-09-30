@@ -23,9 +23,7 @@ submitBtn.addEventListener("click", async () => {
     return;
   }
 
-  // Subir foto
-  const fileRef = ref(storage, `users/${userId}.jpg`);
-  await uploadBytes(fileRef, file);
+
 
   // Ver si hay alguien esperando en este color
   const waitingRef = doc(db, "waiting", color);
@@ -73,3 +71,4 @@ submitBtn.addEventListener("click", async () => {
   resultDiv.style.display = "block";
 
 });
+
