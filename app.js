@@ -16,9 +16,9 @@ const myPhoto = document.getElementById("myPhoto");
 const userId = "u_" + Math.random().toString(36).substring(2, 10);
 
 submitBtn.addEventListener("click", async () => {
-  const file = fileInput.files[0];
+  
   const color = colorSelect.value;
-  if (!file || !color) {
+  if (!color) {
     alert("Debes subir una foto y elegir un color");
     return;
   }
@@ -26,7 +26,6 @@ submitBtn.addEventListener("click", async () => {
   // Subir foto
   const fileRef = ref(storage, `users/${userId}.jpg`);
   await uploadBytes(fileRef, file);
-  const photoURL = await getDownloadURL(fileRef);
 
   // Ver si hay alguien esperando en este color
   const waitingRef = doc(db, "waiting", color);
@@ -71,6 +70,6 @@ submitBtn.addEventListener("click", async () => {
 
   // Mostrar en pantalla
   matchInfo.textContent = matchText;
-  myPhoto.src = photoURL;
   resultDiv.style.display = "block";
+
 });
