@@ -9,12 +9,12 @@ const firebaseConfig = {
   projectId: "test-7f316",
   storageBucket: "test-7f316.appspot.com",
   messagingSenderId: "158326026589",
-  appId: "1:158326026589:web:ba9065b007eb8aa09bf8b4",
-  measurementId: "G-LXKPBVXZN1"
+  appId: "1:158326026589:web:ba9065b007eb8aa09bf8b4"
 };
 
 
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
 
