@@ -1,0 +1,86 @@
+/* General */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #333;
+}
+
+/* Contenedor principal */
+.container {
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+/* Títulos */
+h1 {
+  font-size: 2rem;
+  color: #fff;
+  margin-bottom: 0.3em;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #fdfdfd;
+  margin-bottom: 1.5em;
+}
+
+/* Tarjeta */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  margin-top: 20px;
+}
+
+/* Inputs */
+.label {
+  display: block;
+  margin: 15px 0 5px;
+  font-weight: bold;
+}
+
+.input-file, .select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.input-file:hover, .select:hover {
+  border-color: #a18cd1;
+}
+
+/* Botón */
+.btn {
+  width: 100%;
+  background: #a18cd1;
+  border: none;
+  color: white;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #7b61b0;
+}
+
+/* Imagen */
+.photo-preview {
+  margin-top: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}

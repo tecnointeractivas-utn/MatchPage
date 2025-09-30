@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Match de Colores</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Match de Colores</h1>
+    <p class="subtitle">Sube tu foto, elige un color y encuentra tu pareja de juego</p>
+
+    <div id="form" class="card">
+      <label class="label">📸 Sube tu foto</label>
+      <input type="file" id="fileInput" accept="image/*" class="input-file">
+
+      <label class="label">🎨 Selecciona un color</label>
+      <select id="colorSelect" class="select">
+        <option value="">--elige--</option>
+        <option value="rojo">🔴 Rojo</option>
+        <option value="verde">🟢 Verde</option>
+        <option value="azul">🔵 Azul</option>
+      </select>
+
+      <button id="submitBtn" class="btn">✨ Participar</button>
+    </div>
+
+    <div id="result" class="card" style="display:none;">
+      <h2>¡Registro exitoso! 🎉</h2>
+      <p id="matchInfo"></p>
+      <img id="myPhoto" width="180" class="photo-preview">
+    </div>
+  </div>
+</body>
+</html>
