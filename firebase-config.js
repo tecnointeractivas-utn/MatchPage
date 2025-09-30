@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyC_wEAzTPA9CO0M-pT84H3uteW7kTaERb0",
   authDomain: "test-7f316.firebaseapp.com",
   projectId: "test-7f316",
-  storageBucket: "test-7f316.firebasestorage.app",
+  storageBucket: "test-7f316.appspot.com",
   messagingSenderId: "158326026589",
   appId: "1:158326026589:web:ba9065b007eb8aa09bf8b4",
   measurementId: "G-LXKPBVXZN1"
@@ -17,3 +17,4 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
