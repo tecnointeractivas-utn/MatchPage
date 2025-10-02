@@ -57,6 +57,7 @@ submitBtn.addEventListener("click", async () => {
     return;
   }
 
+  submitBtn.style.display = "none";
   submitBtn.remove();
 
   try {
