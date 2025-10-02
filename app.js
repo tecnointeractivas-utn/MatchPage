@@ -57,7 +57,7 @@ submitBtn.addEventListener("click", async () => {
     return;
   }
 
-  submitBtn.disabled = true;
+  submitBtn.remove();
 
   try {
     let photoURL = null;
@@ -132,6 +132,10 @@ submitBtn.addEventListener("click", async () => {
     submitBtn.disabled = false;
   }
 });
+
+
+
+
 
 // Escuchar si me emparejaron
 function listenForMatch(myUid) {
