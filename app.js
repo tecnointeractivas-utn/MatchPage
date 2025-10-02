@@ -13,10 +13,18 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 const fileInput  = document.getElementById("fileInput");
+const fullName   = document.getElementById("fullName");
 const submitBtn  = document.getElementById("submitBtn");
 const resultDiv  = document.getElementById("result");
 const matchInfo  = document.getElementById("matchInfo");
 const myPhoto    = document.getElementById("myPhoto");
+
+// Juego
+const gameSection    = document.getElementById("gameSection");
+const assignmentText = document.getElementById("assignmentText");
+const playerAnswer   = document.getElementById("playerAnswer");
+const checkBtn       = document.getElementById("checkBtn");
+const revealResult   = document.getElementById("revealResult");
 
 const userId = "u_" + Math.random().toString(36).substring(2, 10);
 
@@ -33,40 +41,47 @@ const qaPairs = [
   { q: "¿Qué animal es conocido como el rey de la selva?", a: "León" }
 ];
 
+let myRole = null;
+let myQuestionIndex = null;
+let partnerId = null;
+
 function showResult(msg) {
   matchInfo.textContent = msg;
   resultDiv.style.display = "block";
 }
 
 submitBtn.addEventListener("click", async () => {
+  const name = fullName.value.trim();
+  if (!name) {
+    alert("Debes ingresar tu nombre y apellido");
+    return;
+  }
+
   submitBtn.disabled = true;
 
   try {
-    console.log("👉 Iniciando registro de usuario:", userId);
-
-    // Subir foto si hay
     let photoURL = null;
     if (fileInput.files.length > 0) {
       const file = fileInput.files[0];
       const storageRef = ref(storage, `photos/${userId}_${Date.now()}_${file.name}`);
-      console.log("📤 Subiendo foto a storage...");
       await uploadBytes(storageRef, file);
       photoURL = await getDownloadURL(storageRef);
       myPhoto.src = photoURL;
-      console.log("✅ Foto subida:", photoURL);
     }
 
     const waitingRef = doc(db, "waiting", "qa");
     const waitingSnap = await getDoc(waitingRef);
 
     if (!waitingSnap.exists()) {
-      // No hay nadie esperando → asigno pregunta
+      // Nadie esperando → me toca PREGUNTA
       const questionIndex = Math.floor(Math.random() * qaPairs.length);
-      console.log("📝 Nadie esperando. Me asignan la PREGUNTA:", qaPairs[questionIndex].q);
+      myRole = "question";
+      myQuestionIndex = questionIndex;
 
       await setDoc(doc(db, "users", userId), {
         uid: userId,
-        role: "question",
+        fullName: name,
+        role: myRole,
         questionIndex,
         question: qaPairs[questionIndex].q,
         answer: qaPairs[questionIndex].a,
@@ -74,23 +89,27 @@ submitBtn.addEventListener("click", async () => {
         matchWith: null,
         createdAt: Date.now()
       });
-      console.log("✅ Guardado en users como question");
 
       await setDoc(waitingRef, { uid: userId, questionIndex });
-      console.log("✅ Guardado en waiting/qa");
 
-      showResult("Eres el primero. Te tocó la PREGUNTA. Esperando a tu pareja...");
+      showResult("Eres el primero. Te tocó una PREGUNTA. Esperando a tu pareja...");
+      assignmentText.textContent = `Tu PREGUNTA es: ${qaPairs[questionIndex].q}`;
+      gameSection.style.display = "block";
+
       listenForMatch(userId);
 
     } else {
-      // Había alguien esperando → asigno respuesta
+      // Ya había alguien esperando → me toca RESPUESTA
       const otherId = waitingSnap.data().uid;
       const questionIndex = waitingSnap.data().questionIndex;
-      console.log("🔗 Encontrado esperando:", otherId, "con pregunta:", qaPairs[questionIndex].q);
+      myRole = "answer";
+      myQuestionIndex = questionIndex;
+      partnerId = otherId;
 
       await setDoc(doc(db, "users", userId), {
         uid: userId,
-        role: "answer",
+        fullName: name,
+        role: myRole,
         questionIndex,
         question: qaPairs[questionIndex].q,
         answer: qaPairs[questionIndex].a,
@@ -98,33 +117,69 @@ submitBtn.addEventListener("click", async () => {
         matchWith: otherId,
         createdAt: Date.now()
       });
-      console.log("✅ Guardado en users como answer");
 
       await setDoc(doc(db, "users", otherId), { matchWith: userId }, { merge: true });
-      console.log("✅ Actualizado el otro usuario con mi UID");
-
       await deleteDoc(waitingRef);
-      console.log("🗑️ Eliminado waiting/qa");
 
-      showResult("¡Tienes match! A ti te tocó la RESPUESTA 🎉");
+      showResult("¡Match realizado! Te tocó una RESPUESTA.");
+      assignmentText.textContent = `Tu RESPUESTA es: ${qaPairs[questionIndex].a}`;
+      gameSection.style.display = "block";
     }
-
   } catch (err) {
-    console.error("❌ Error en el flujo:", err);
-    alert("Error en el registro. Revisa la consola.");
+    console.error(err);
+    alert("Error en el registro. Revisa consola.");
   } finally {
     submitBtn.disabled = false;
   }
 });
 
+// Escuchar si me emparejaron
 function listenForMatch(myUid) {
   const meRef = doc(db, "users", myUid);
-  onSnapshot(meRef, (snap) => {
+  onSnapshot(meRef, async (snap) => {
     if (!snap.exists()) return;
     const me = snap.data();
     if (me.matchWith) {
-      console.log("🎉 Tu pareja llegó:", me.matchWith);
+      partnerId = me.matchWith;
       showResult("¡Tu pareja llegó! Están emparejados 🎉");
     }
   });
 }
+
+// Validación del juego
+checkBtn.addEventListener("click", async () => {
+  if (!myRole || myQuestionIndex === null) {
+    alert("Primero debes registrarte");
+    return;
+  }
+  const attempt = playerAnswer.value.trim();
+  if (!attempt) {
+    alert("Escribe una respuesta antes de comprobar");
+    return;
+  }
+
+  const correctQ = qaPairs[myQuestionIndex].q;
+  const correctA = qaPairs[myQuestionIndex].a;
+
+  const partnerRef = doc(db, "users", partnerId);
+  const partnerSnap = await getDoc(partnerRef);
+  if (!partnerSnap.exists()) {
+    revealResult.textContent = "❌ No se encontró tu pareja";
+    return;
+  }
+  const partnerData = partnerSnap.data();
+
+  if (myRole === "question") {
+    if (attempt.toLowerCase() === correctA.toLowerCase()) {
+      revealResult.textContent = `✅ ¡Correcto! Tu pareja (RESPUESTA) es: ${partnerData.fullName}`;
+    } else {
+      revealResult.textContent = "❌ Respuesta incorrecta. Intenta de nuevo.";
+    }
+  } else if (myRole === "answer") {
+    if (attempt.toLowerCase() === correctQ.toLowerCase()) {
+      revealResult.textContent = `✅ ¡Correcto! Tu pareja (PREGUNTA) es: ${partnerData.fullName}`;
+    } else {
+      revealResult.textContent = "❌ No coincide con la pregunta. Intenta de nuevo.";
+    }
+  }
+});

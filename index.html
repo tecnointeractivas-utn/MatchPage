@@ -22,9 +22,18 @@
         <option value="verde">🟢 Verde</option>
         <option value="azul">🔵 Azul</option>
       </select>
-      <label class="label">❓ Pregunta</label>
-<p id="quizQuestion"></p>
-<input type="text" id="quizAnswer" placeholder="Escribe tu respuesta" class="select">
+
+<label class="label">👤 Nombre y Apellido</label>
+<input type="text" id="fullName" placeholder="Ej: Juan Pérez" class="select">
+
+<!-- Estos aparecerán después del match -->
+<div id="gameSection" style="display:none; margin-top:15px;">
+  <p id="assignmentText"></p>
+  <input type="text" id="playerAnswer" placeholder="Escribe tu respuesta..." class="select">
+  <button id="checkBtn" class="btn">✅ Comprobar</button>
+  <p id="revealResult" style="margin-top:10px; font-weight:bold;"></p>
+</div>
+
 
 
       <button id="submitBtn" class="btn">✨ Participar</button>
