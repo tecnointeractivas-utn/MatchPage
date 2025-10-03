@@ -1,10 +1,12 @@
+// app.js
 import { db, storage } from "./firebase-config.js";
 import {
   doc,
   setDoc,
   getDoc,
   deleteDoc,
-  onSnapshot
+  onSnapshot,
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import {
   ref,
@@ -71,61 +73,66 @@ submitBtn.addEventListener("click", async () => {
     }
 
     const waitingRef = doc(db, "waiting", "qa");
-    const waitingSnap = await getDoc(waitingRef);
 
-    if (!waitingSnap.exists()) {
-      // Nadie esperando → me toca PREGUNTA
-      const questionIndex = Math.floor(Math.random() * qaPairs.length);
-      myRole = "question";
-      myQuestionIndex = questionIndex;
+    // Usamos una transacción para evitar condiciones de carrera
+    await runTransaction(db, async (transaction) => {
+      const waitingSnap = await transaction.get(waitingRef);
 
-      await setDoc(doc(db, "users", userId), {
-        uid: userId,
-        fullName: name,
-        role: myRole,
-        questionIndex,
-        question: qaPairs[questionIndex].q,
-        answer: qaPairs[questionIndex].a,
-        photoURL,
-        matchWith: null,
-        createdAt: Date.now()
-      });
+      if (!waitingSnap.exists()) {
+        // Nadie esperando → me toca PREGUNTA
+        const questionIndex = Math.floor(Math.random() * qaPairs.length);
+        myRole = "question";
+        myQuestionIndex = questionIndex;
 
-      await setDoc(waitingRef, { uid: userId, questionIndex });
+        transaction.set(doc(db, "users", userId), {
+          uid: userId,
+          fullName: name,
+          role: myRole,
+          questionIndex,
+          question: qaPairs[questionIndex].q,
+          answer: qaPairs[questionIndex].a,
+          photoURL,
+          matchWith: null,
+          createdAt: Date.now()
+        });
 
-      showResult("Eres el primero. Te tocó una PREGUNTA. Esperando a tu pareja...");
-      assignmentText.textContent = `Tu PREGUNTA es: ${qaPairs[questionIndex].q}`;
-      gameSection.style.display = "block";
+        transaction.set(waitingRef, { uid: userId, questionIndex });
 
-      listenForMatch(userId);
+        showResult("Eres el primero. Te tocó una PREGUNTA. Esperando a tu pareja...");
+        assignmentText.textContent = `Tu PREGUNTA es: ${qaPairs[questionIndex].q}`;
+        gameSection.style.display = "block";
 
-    } else {
-      // Ya había alguien esperando → me toca RESPUESTA
-      const otherId = waitingSnap.data().uid;
-      const questionIndex = waitingSnap.data().questionIndex;
-      myRole = "answer";
-      myQuestionIndex = questionIndex;
-      partnerId = otherId;
+        listenForMatch(userId);
 
-      await setDoc(doc(db, "users", userId), {
-        uid: userId,
-        fullName: name,
-        role: myRole,
-        questionIndex,
-        question: qaPairs[questionIndex].q,
-        answer: qaPairs[questionIndex].a,
-        photoURL,
-        matchWith: otherId,
-        createdAt: Date.now()
-      });
+      } else {
+        // Ya había alguien esperando → me toca RESPUESTA
+        const otherId = waitingSnap.data().uid;
+        const questionIndex = waitingSnap.data().questionIndex;
+        myRole = "answer";
+        myQuestionIndex = questionIndex;
+        partnerId = otherId;
 
-      await setDoc(doc(db, "users", otherId), { matchWith: userId }, { merge: true });
-      await deleteDoc(waitingRef);
+        transaction.set(doc(db, "users", userId), {
+          uid: userId,
+          fullName: name,
+          role: myRole,
+          questionIndex,
+          question: qaPairs[questionIndex].q,
+          answer: qaPairs[questionIndex].a,
+          photoURL,
+          matchWith: otherId,
+          createdAt: Date.now()
+        });
 
-      showResult("¡Match realizado! Te tocó una RESPUESTA.");
-      assignmentText.textContent = `Tu RESPUESTA es: ${qaPairs[questionIndex].a}`;
-      gameSection.style.display = "block";
-    }
+        transaction.set(doc(db, "users", otherId), { matchWith: userId }, { merge: true });
+        transaction.delete(waitingRef);
+
+        showResult("¡Match realizado! Te tocó una RESPUESTA.");
+        assignmentText.textContent = `Tu RESPUESTA es: ${qaPairs[questionIndex].a}`;
+        gameSection.style.display = "block";
+      }
+    });
+
   } catch (err) {
     console.error(err);
     alert("Error en el registro. Revisa consola.");
@@ -133,10 +140,6 @@ submitBtn.addEventListener("click", async () => {
     submitBtn.disabled = false;
   }
 });
-
-
-
-
 
 // Escuchar si me emparejaron
 function listenForMatch(myUid) {
