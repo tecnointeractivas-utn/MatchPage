@@ -16,6 +16,7 @@ import {
 
 const fileInput  = document.getElementById("fileInput");
 const fullName   = document.getElementById("fullName");
+const colorSelect = document.getElementById("colorSelect");
 const submitBtn  = document.getElementById("submitBtn");
 const resultDiv  = document.getElementById("result");
 const matchInfo  = document.getElementById("matchInfo");
@@ -54,8 +55,14 @@ function showResult(msg) {
 
 submitBtn.addEventListener("click", async () => {
   const name = fullName.value.trim();
+  const color = colorSelect.value;
+
   if (!name) {
     alert("Debes ingresar tu nombre y apellido");
+    return;
+  }
+  if (!color) {
+    alert("Debes seleccionar un color");
     return;
   }
 
@@ -72,14 +79,15 @@ submitBtn.addEventListener("click", async () => {
       myPhoto.src = photoURL;
     }
 
-    const waitingRef = doc(db, "waiting", "qa");
+    // Cola específica por color
+    const waitingRef = doc(db, "waiting", `qa_${color}`);
 
     // Usamos una transacción para evitar condiciones de carrera
     await runTransaction(db, async (transaction) => {
       const waitingSnap = await transaction.get(waitingRef);
 
       if (!waitingSnap.exists()) {
-        // Nadie esperando → me toca PREGUNTA
+        // Nadie esperando en este color → me toca PREGUNTA
         const questionIndex = Math.floor(Math.random() * qaPairs.length);
         myRole = "question";
         myQuestionIndex = questionIndex;
@@ -87,6 +95,7 @@ submitBtn.addEventListener("click", async () => {
         transaction.set(doc(db, "users", userId), {
           uid: userId,
           fullName: name,
+          color,
           role: myRole,
           questionIndex,
           question: qaPairs[questionIndex].q,
@@ -98,14 +107,14 @@ submitBtn.addEventListener("click", async () => {
 
         transaction.set(waitingRef, { uid: userId, questionIndex });
 
-        showResult("Eres el primero. Te tocó una PREGUNTA. Esperando a tu pareja...");
+        showResult(`Eres el primero en ${color}. Te tocó una PREGUNTA. Esperando a tu pareja...`);
         assignmentText.textContent = `Tu PREGUNTA es: ${qaPairs[questionIndex].q}`;
         gameSection.style.display = "block";
 
         listenForMatch(userId);
 
       } else {
-        // Ya había alguien esperando → me toca RESPUESTA
+        // Ya había alguien esperando en este color → me toca RESPUESTA
         const otherId = waitingSnap.data().uid;
         const questionIndex = waitingSnap.data().questionIndex;
         myRole = "answer";
@@ -115,6 +124,7 @@ submitBtn.addEventListener("click", async () => {
         transaction.set(doc(db, "users", userId), {
           uid: userId,
           fullName: name,
+          color,
           role: myRole,
           questionIndex,
           question: qaPairs[questionIndex].q,
@@ -127,7 +137,7 @@ submitBtn.addEventListener("click", async () => {
         transaction.set(doc(db, "users", otherId), { matchWith: userId }, { merge: true });
         transaction.delete(waitingRef);
 
-        showResult("¡Match realizado! Te tocó una RESPUESTA.");
+        showResult(`¡Match realizado en ${color}! Te tocó una RESPUESTA.`);
         assignmentText.textContent = `Tu RESPUESTA es: ${qaPairs[questionIndex].a}`;
         gameSection.style.display = "block";
       }
