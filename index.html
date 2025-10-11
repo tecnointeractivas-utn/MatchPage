@@ -12,9 +12,8 @@
     <p class="subtitle">Sube tu foto, elige un color y encuentra tu pareja de juego</p>
 
     <div id="form" class="card">
-<label class="label">📸 Sube tu foto</label>
-<input type="file" id="fileInput" accept="image/*" class="input-file">
-
+      <label class="label">📸 Sube tu foto</label>
+      <input type="file" id="fileInput" accept="image/*" class="input-file">
 
       <label class="label">🎨 Selecciona un color</label>
       <select id="colorSelect" class="select">
@@ -24,19 +23,17 @@
         <option value="azul">🔵 Azul</option>
       </select>
 
-<label class="label">👤 Nombre y Apellido</label>
-<input type="text" id="fullName" placeholder="Ej: Juan Pérez" class="text-input">
+      <label class="label">👤 Nombre y Apellido</label>
+      <input type="text" id="fullName" placeholder="Ej: Juan Pérez" class="text-input">
 
-
-<!-- Estos aparecerán después del match -->
-<div id="gameSection" style="display:none; margin-top:15px;">
-  <p id="assignmentText"></p>
-  <input type="text" id="playerAnswer" placeholder="Escribe tu respuesta..." class="select">
-  <button id="checkBtn" class="btn">✅ Comprobar</button>
-  <p id="revealResult" style="margin-top:10px; font-weight:bold;"></p>
-</div>
-
-
+      <!-- Estos aparecerán después del match -->
+      <div id="gameSection" style="display:none; margin-top:15px;">
+        <p id="assignmentText"></p>
+        <input type="text" id="playerAnswer" placeholder="Escribe tu respuesta..." class="select">
+        <button id="checkBtn" class="btn">✅ Comprobar</button>
+        <p id="revealResult" style="margin-top:10px; font-weight:bold;"></p>
+        <img id="partnerPhoto" width="180" class="photo-preview" style="display:none;">
+      </div>
 
       <button id="submitBtn" class="btn">✨ Participar</button>
     </div>

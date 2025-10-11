@@ -28,6 +28,7 @@ const assignmentText = document.getElementById("assignmentText");
 const playerAnswer   = document.getElementById("playerAnswer");
 const checkBtn       = document.getElementById("checkBtn");
 const revealResult   = document.getElementById("revealResult");
+const partnerPhoto   = document.getElementById("partnerPhoto");
 
 const userId = "u_" + Math.random().toString(36).substring(2, 10);
 
@@ -187,17 +188,25 @@ checkBtn.addEventListener("click", async () => {
   }
   const partnerData = partnerSnap.data();
 
+  let isCorrect = false;
+
   if (myRole === "question") {
-    if (attempt.toLowerCase() === correctA.toLowerCase()) {
-      revealResult.textContent = `✅ ¡Correcto! Tu pareja (RESPUESTA) es: ${partnerData.fullName}`;
-    } else {
-      revealResult.textContent = "❌ Respuesta incorrecta. Intenta de nuevo.";
-    }
+    isCorrect = attempt.toLowerCase() === correctA.toLowerCase();
+    revealResult.textContent = isCorrect
+      ? `✅ ¡Correcto! Tu pareja (RESPUESTA) es: ${partnerData.fullName}`
+      : "❌ Respuesta incorrecta. Intenta de nuevo.";
   } else if (myRole === "answer") {
-    if (attempt.toLowerCase() === correctQ.toLowerCase()) {
-      revealResult.textContent = `✅ ¡Correcto! Tu pareja (PREGUNTA) es: ${partnerData.fullName}`;
-    } else {
-      revealResult.textContent = "❌ No coincide con la pregunta. Intenta de nuevo.";
-    }
+    isCorrect = attempt.toLowerCase() === correctQ.toLowerCase();
+    revealResult.textContent = isCorrect
+      ? `✅ ¡Correcto! Tu pareja (PREGUNTA) es: ${partnerData.fullName}`
+      : "❌ No coincide con la pregunta. Intenta de nuevo.";
+  }
+
+  // Mostrar foto solo si la respuesta es correcta y existe foto
+  if (isCorrect && partnerData.photoURL) {
+    partnerPhoto.src = partnerData.photoURL;
+    partnerPhoto.style.display = "block";
+  } else {
+    partnerPhoto.style.display = "none";
   }
 });
