@@ -5,9 +5,10 @@ body {
   margin: 0;
   padding: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+  flex-direction: column;  /* 🔹 apilar elementos en columna */
+  align-items: center;     /* 🔹 centrar horizontalmente */
+  justify-content: flex-start; /* 🔹 comenzar desde arriba */
+  min-height: 100vh;
   color: #333;
 }
 
@@ -120,16 +121,18 @@ h1 {
   background: #7b61b0;
 }
 
+/* Logo */
 .logo-container {
   text-align: center;
   margin: 20px 0;
 }
 
 .logo {
-  max-width: 300px; /* Ajusta el tamaño máximo */
+  max-width: 250px; /* 🔹 tamaño del logo */
   height: auto;
+  display: block;
+  margin: 0 auto;
 }
-
 
 /* Input de texto (nombre y apellido) */
 .text-input {
